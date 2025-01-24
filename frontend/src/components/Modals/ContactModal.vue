@@ -154,7 +154,7 @@ watch(
   (value) => {
     if (!value) return
     nextTick(() => {
-      _contact.value = { ...props.contact.data }
+      _contact.value = { ...props.contact }
     })
   },
 )

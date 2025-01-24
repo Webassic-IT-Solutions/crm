@@ -125,6 +125,7 @@
           :sections="sections.data"
           :addContact="addContact"
           :createContact="(value) => {
+            console.log(deal)
             _contact = {
               first_name: value,
               company_name: deal.data.organization,
