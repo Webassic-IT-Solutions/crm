@@ -24,12 +24,6 @@
                     (value, close) => {
                       console.log(data)
                       createContact(value)
-                      /*_contact = {
-                        first_name: value,
-                        company_name: data.organization,
-                      }
-                      showContactModal = true
-                      */
                       close()
                     }
                   "
