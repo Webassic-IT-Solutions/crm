@@ -124,6 +124,13 @@
           v-model="deal.data"
           :sections="sections.data"
           :addContact="addContact"
+          :createContact="(value) => {
+            _contact = {
+              first_name: value,
+              company_name: deal.data.organization,
+            }
+            showContactModal = true
+          } "
           doctype="CRM Deal"
           v-slot="{ section }"
           @update="updateField"
