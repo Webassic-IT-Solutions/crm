@@ -138,6 +138,13 @@ onMounted(() => {
 })
 
 function getRoute(notification) {
+  console.log(notification)
+  if(!notification.reference_name){
+    return {
+      name: "Tasks"
+    }
+
+  }
   let params = {
     leadId: notification.reference_name,
   }
