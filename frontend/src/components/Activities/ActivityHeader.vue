@@ -29,7 +29,7 @@
     <Button
       v-else-if="title == 'Calls'"
       variant="solid"
-      @click="makeCall(doc.data.mobile_no)"
+      @click="makeCall(doc.data.mobile_no, doc.data)"
     >
       <template #prefix>
         <PhoneIcon class="h-4 w-4" />
@@ -139,7 +139,7 @@ const defaultActions = computed(() => {
     {
       icon: h(PhoneIcon, { class: 'h-4 w-4' }),
       label: __('Make a Call'),
-      onClick: () => makeCall(props.doc.data.mobile_no),
+      onClick: () => makeCall(props.doc.data.mobile_no, props.doc.data),
       condition: () => callEnabled.value,
     },
     {

@@ -376,7 +376,7 @@
       <Button
         v-if="title == 'Calls'"
         :label="__('Make a Call')"
-        @click="makeCall(doc.data.mobile_no)"
+        @click="makeCall(doc.data.mobile_no, doc.data)"
       />
       <Button
         v-else-if="title == 'Notes'"
@@ -503,6 +503,8 @@ import {
   onBeforeUnmount,
 } from 'vue'
 import { useRoute } from 'vue-router'
+import { useCallStore } from '../../stores/call'
+import { storeToRefs } from 'pinia'
 
 const { makeCall, $socket } = globalStore()
 const { getUser } = usersStore()
@@ -528,6 +530,15 @@ const tabIndex = defineModel('tabIndex')
 const reload_email = ref(false)
 const modalRef = ref(null)
 const showFilesUploader = ref(false)
+
+const callStore = useCallStore();
+const { callStatus } = storeToRefs(callStore);
+
+watch(callStatus, ()=>{
+  if(callStatus.value == "Call Added"){
+    reload.value  = true
+  }
+})
 
 const title = computed(() => props.tabs?.[tabIndex.value]?.name || 'Activity')
 

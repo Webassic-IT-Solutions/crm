@@ -650,7 +650,7 @@ function triggerCall() {
     return
   }
 
-  makeCall(mobile_no)
+  makeCall(mobile_no, primaryContact)
 }
 
 function updateField(name, value, callback) {

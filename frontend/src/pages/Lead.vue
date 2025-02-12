@@ -8,103 +8,66 @@
       </Breadcrumbs>
     </template>
     <template #right-header>
-      <CustomActions
-        v-if="lead.data._customActions?.length"
-        :actions="lead.data._customActions"
-      />
-      <AssignTo
-        v-model="lead.data._assignedTo"
-        :data="lead.data"
-        doctype="CRM Lead"
-      />
-      <Dropdown
-        :options="statusOptions('lead', updateField, lead.data._customStatuses)"
-      >
+      <CustomActions v-if="lead.data._customActions?.length" :actions="lead.data._customActions" />
+      <AssignTo v-model="lead.data._assignedTo" :data="lead.data" doctype="CRM Lead" />
+      <Dropdown :options="statusOptions('lead', updateField, lead.data._customStatuses)">
         <template #default="{ open }">
           <Button :label="lead.data.status">
             <template #prefix>
               <IndicatorIcon :class="getLeadStatus(lead.data.status).color" />
             </template>
             <template #suffix>
-              <FeatherIcon
-                :name="open ? 'chevron-up' : 'chevron-down'"
-                class="h-4"
-              />
+              <FeatherIcon :name="open ? 'chevron-up' : 'chevron-down'" class="h-4" />
             </template>
           </Button>
         </template>
       </Dropdown>
-      <Button
-        :label="__('Convert to Deal')"
-        variant="solid"
-        @click="showConvertToDealModal = true"
-      />
+      <Button :label="__('Convert to Deal')" variant="solid" @click="showConvertToDealModal = true" />
     </template>
   </LayoutHeader>
   <div v-if="lead?.data" class="flex h-full overflow-hidden">
     <Tabs as="div" v-model="tabIndex" :tabs="tabs">
       <template #tab-panel>
-        <Activities
-          ref="activities"
-          doctype="CRM Lead"
-          :tabs="tabs"
-          v-model:reload="reload"
-          v-model:tabIndex="tabIndex"
-          v-model="lead"
-        />
+        <Activities ref="activities" doctype="CRM Lead" :tabs="tabs" v-model:reload="reload" v-model:tabIndex="tabIndex"
+          v-model="lead" />
       </template>
     </Tabs>
     <Resizer class="flex flex-col justify-between border-l" side="right">
-      <div
-        class="flex h-10.5 cursor-copy items-center border-b px-5 py-2.5 text-lg font-medium text-ink-gray-9"
-        @click="copyToClipboard(lead.data.name)"
-      >
+      <div class="flex h-10.5 cursor-copy items-center border-b px-5 py-2.5 text-lg font-medium text-ink-gray-9"
+        @click="copyToClipboard(lead.data.name)">
         {{ __(lead.data.name) }}
       </div>
-      <FileUploader
-        @success="(file) => updateField('image', file.file_url)"
-        :validateFile="validateFile"
-      >
+      <FileUploader @success="(file) => updateField('image', file.file_url)" :validateFile="validateFile">
         <template #default="{ openFileSelector, error }">
           <div class="flex items-center justify-start gap-5 border-b p-5">
             <div class="group relative size-12">
-              <Avatar
-                size="3xl"
-                class="size-12"
-                :label="lead.data.first_name || __('Untitled')"
-                :image="lead.data.image"
-              />
-              <component
-                :is="lead.data.image ? Dropdown : 'div'"
-                v-bind="
-                  lead.data.image
-                    ? {
-                        options: [
-                          {
-                            icon: 'upload',
-                            label: lead.data.image
-                              ? __('Change image')
-                              : __('Upload image'),
-                            onClick: openFileSelector,
-                          },
-                          {
-                            icon: 'trash-2',
-                            label: __('Remove image'),
-                            onClick: () => updateField('image', ''),
-                          },
-                        ],
-                      }
-                    : { onClick: openFileSelector }
-                "
-                class="!absolute bottom-0 left-0 right-0"
-              >
+              <Avatar size="3xl" class="size-12" :label="lead.data.first_name || __('Untitled')"
+                :image="lead.data.image" />
+              <component :is="lead.data.image ? Dropdown : 'div'" v-bind="lead.data.image
+                  ? {
+                    options: [
+                      {
+                        icon: 'upload',
+                        label: lead.data.image
+                          ? __('Change image')
+                          : __('Upload image'),
+                        onClick: openFileSelector,
+                      },
+                      {
+                        icon: 'trash-2',
+                        label: __('Remove image'),
+                        onClick: () => updateField('image', ''),
+                      },
+                    ],
+                  }
+                  : { onClick: openFileSelector }
+                " class="!absolute bottom-0 left-0 right-0">
                 <div
                   class="z-1 absolute bottom-0.5 left-0 right-0.5 flex h-9 cursor-pointer items-center justify-center rounded-b-full bg-black bg-opacity-40 pt-3 opacity-0 duration-300 ease-in-out group-hover:opacity-100"
                   style="
                     -webkit-clip-path: inset(12px 0 0 0);
                     clip-path: inset(12px 0 0 0);
-                  "
-                >
+                  ">
                   <CameraIcon class="size-4 cursor-pointer text-white" />
                 </div>
               </component>
@@ -117,40 +80,30 @@
               </Tooltip>
               <div class="flex gap-1.5">
                 <Tooltip v-if="callEnabled" :text="__('Make a call')">
-                  <Button
-                    class="h-7 w-7"
-                    @click="
-                      () =>
-                        lead.data.mobile_no
-                          ? makeCall(lead.data.mobile_no)
-                          : errorMessage(__('No phone number set'))
-                    "
-                  >
+                  <Button class="h-7 w-7" @click="() =>
+                      lead.data.mobile_no
+                        ? makeCall(lead.data.mobile_no, lead.data)
+                        : errorMessage(__('No phone number set'))
+                    ">
                     <PhoneIcon class="h-4 w-4" />
                   </Button>
                 </Tooltip>
                 <Tooltip :text="__('Send an email')">
                   <Button class="h-7 w-7">
-                    <Email2Icon
-                      class="h-4 w-4"
-                      @click="
-                        lead.data.email
-                          ? openEmailBox()
-                          : errorMessage(__('No email set'))
-                      "
-                    />
+                    <Email2Icon class="h-4 w-4" @click="
+                      lead.data.email
+                        ? openEmailBox()
+                        : errorMessage(__('No email set'))
+                      " />
                   </Button>
                 </Tooltip>
                 <Tooltip :text="__('Go to website')">
                   <Button class="h-7 w-7">
-                    <LinkIcon
-                      class="h-4 w-4"
-                      @click="
-                        lead.data.website
-                          ? openWebsite(lead.data.website)
-                          : errorMessage(__('No website set'))
-                      "
-                    />
+                    <LinkIcon class="h-4 w-4" @click="
+                      lead.data.website
+                        ? openWebsite(lead.data.website)
+                        : errorMessage(__('No website set'))
+                      " />
                   </Button>
                 </Tooltip>
                 <Tooltip :text="__('Attach a file')">
@@ -164,39 +117,24 @@
           </div>
         </template>
       </FileUploader>
-      <SLASection
-        v-if="lead.data.sla_status"
-        v-model="lead.data"
-        @updateField="updateField"
-      />
-      <div
-        v-if="sections.data"
-        class="flex flex-1 flex-col justify-between overflow-hidden"
-      >
-        <SidePanelLayout
-          v-model="lead.data"
-          :sections="sections.data"
-          doctype="CRM Lead"
-          @update="updateField"
-          @reload="sections.reload"
-        />
+      <SLASection v-if="lead.data.sla_status" v-model="lead.data" @updateField="updateField" />
+      <div v-if="sections.data" class="flex flex-1 flex-col justify-between overflow-hidden">
+        <SidePanelLayout v-model="lead.data" :sections="sections.data" doctype="CRM Lead" @update="updateField"
+          @reload="sections.reload" />
       </div>
     </Resizer>
   </div>
-  <Dialog
-    v-model="showConvertToDealModal"
-    :options="{
-      title: __('Convert to Deal'),
-      size: 'xl',
-      actions: [
-        {
-          label: __('Convert'),
-          variant: 'solid',
-          onClick: convertToDeal,
-        },
-      ],
-    }"
-  >
+  <Dialog v-model="showConvertToDealModal" :options="{
+    title: __('Convert to Deal'),
+    size: 'xl',
+    actions: [
+      {
+        label: __('Convert'),
+        variant: 'solid',
+        onClick: convertToDeal,
+      },
+    ],
+  }">
     <template #body-content>
       <div class="mb-4 flex items-center gap-2 text-ink-gray-5">
         <OrganizationsIcon class="h-4 w-4" />
@@ -207,15 +145,8 @@
           <div>{{ __('Choose Existing') }}</div>
           <Switch v-model="existingOrganizationChecked" />
         </div>
-        <Link
-          v-if="existingOrganizationChecked"
-          class="form-control mt-2.5"
-          variant="outline"
-          size="md"
-          :value="existingOrganization"
-          doctype="CRM Organization"
-          @change="(data) => (existingOrganization = data)"
-        />
+        <Link v-if="existingOrganizationChecked" class="form-control mt-2.5" variant="outline" size="md"
+          :value="existingOrganization" doctype="CRM Organization" @change="(data) => (existingOrganization = data)" />
         <div v-else class="mt-2.5 text-base">
           {{
             __(
@@ -234,33 +165,19 @@
           <div>{{ __('Choose Existing') }}</div>
           <Switch v-model="existingContactChecked" />
         </div>
-        <Link
-          v-if="existingContactChecked"
-          class="form-control mt-2.5"
-          variant="outline"
-          size="md"
-          :value="existingContact"
-          doctype="Contact"
-          @change="(data) => (existingContact = data)"
-        />
+        <Link v-if="existingContactChecked" class="form-control mt-2.5" variant="outline" size="md"
+          :value="existingContact" doctype="Contact" @change="(data) => (existingContact = data)" />
         <div v-else class="mt-2.5 text-base">
           {{ __("New contact will be created based on the person's details") }}
         </div>
       </div>
     </template>
   </Dialog>
-  <FilesUploader
-    v-if="lead.data?.name"
-    v-model="showFilesUploader"
-    doctype="CRM Lead"
-    :docname="lead.data.name"
-    @after="
-      () => {
-        activities?.all_activities?.reload()
-        changeTabTo('attachments')
-      }
-    "
-  />
+  <FilesUploader v-if="lead.data?.name" v-model="showFilesUploader" doctype="CRM Lead" :docname="lead.data.name" @after="() => {
+      activities?.all_activities?.reload()
+      changeTabTo('attachments')
+    }
+    " />
 </template>
 <script setup>
 import Icon from '@/components/Icon.vue'

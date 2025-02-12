@@ -16,8 +16,8 @@ export const globalStore = defineStore('crm-global', () => {
     callMethod = value
   }
 
-  function makeCall(number) {
-    callMethod(number)
+  function makeCall(number, reference_doc) {
+    callMethod(number, reference_doc)
   }
 
   return {

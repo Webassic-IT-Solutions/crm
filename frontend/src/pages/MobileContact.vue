@@ -70,7 +70,7 @@
                   :label="__('Make Call')"
                   size="sm"
                   @click="
-                    callEnabled && makeCall(contact.data.actual_mobile_no)
+                    callEnabled && makeCall(contact.data.actual_mobile_no, contact.data)
                   "
                 >
                   <template #prefix>

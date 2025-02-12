@@ -26,7 +26,7 @@ createResource({
   cache: 'Is Twilio Enabled',
   auto: true,
   onSuccess: (data) => {
-    callEnabled.value = Boolean(data)
+    callEnabled.value = Boolean(data) || true
   },
 })
 
