@@ -139,7 +139,6 @@ function hangUpCall(){
     endTime = new Date();
 
     updateCallState("Completed")
-    console.log(callDuration);
 
 }
 function rejectCall() {
