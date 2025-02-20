@@ -121,7 +121,7 @@
   </div>
 
 
-  <CallUIManual v-show="callManualPopup" :reference_doc="reference_doc" @after="callCompleted"/>
+  <CallUIManual v-show="callManualPopup" :reference_doc="reference_doc" @after="callCompleted" @close="callManualPopup=false"/>
 
   <NoteModal v-model="showNoteModal" :note="note" doctype="CRM Call Log" @after="updateNote" />
 </template>

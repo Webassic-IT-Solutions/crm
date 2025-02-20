@@ -1,14 +1,16 @@
 <template>
     <div v-bind="$attrs">
         <div ref="callPopup"
-            class="fixed z-20 flex w-60 cursor-move select-none flex-col rounded-lg bg-surface-gray-7 p-4 text-ink-gray-2 shadow-2xl"
+            class="fixed z-20 flex w-60flex-col rounded-lg bg-surface-gray-7 p-4 text-ink-gray-2 shadow-2xl"
             :style="style">
 
             <div class="flex flex-row-reverse items-center gap-1">
-                <MinimizeIcon class="h-4 w-4 cursor-pointer" @click="toggleCallWindow" />
+                <button @click="close" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700">
+                    ❌
+                </button>
             </div>
 
-            <div class="flex flex-col items-center justify-center gap-3">
+            <div class="flex flex-col items-center justify-center gap-3  cursor-move select-none ">
                 <Avatar :image="props.reference_doc?.lead_name.image" :label="props.reference_doc?.lead_name"
                     class="relative flex !h-24 !w-24 items-center justify-center [&>div]:text-[30px]"
                     :class="onCall || calling ? '' : 'pulse'" />
@@ -49,7 +51,7 @@
                         </template>
                     </Button>
                 </div>
-                <div v-if="completeCall" class="flex gap-2">
+                <div v-if="completeCall || onCall" class="flex gap-2">
                     <div class="flex flex-col gap-4">
                         <div>
                             <FormControl ref="title" :label="__('Title')" v-model="_note.title"
@@ -64,10 +66,10 @@
                                     " />
 
                         </div>
-                        <div>
+                        <div v-if="completeCall">
                             <FormControl  :label="__('Duration')" v-model="_note.duration" />
                         </div>
-                        <Button size="md" variant="solid" theme="green" :label="__('Add Note')" class="rounded-lg"  @click.stop="saveCallLog">
+                        <Button v-if="completeCall" size="md" variant="solid" theme="green" :label="__('Add Note')" class="rounded-lg"  @click.stop="saveCallLog">
                             <template #prefix>
                                 <NoteIcon class="h-4 w-4 fill-white" />
                             </template>
@@ -103,7 +105,8 @@ const props = defineProps({
     default: null,
   },
 })
-const emit = defineEmits(['after'])
+const emit = defineEmits(['after', 'close'])
+
 
 const { getUser } = usersStore()
 
@@ -151,6 +154,15 @@ function rejectCall() {
     updateCallState("No Answer")
     _note.value = { title: "Call Rejected", content: "Call on number #" + props.reference_doc?.mobile_no + " rejected" , call_status: "Rejected", duration:0}
 }
+function close(){
+    counterUp.value.stop();
+    completeCall.value = false;
+    onCall.value = false;
+    calling.value = true;
+    emit('close')
+
+
+}
 async function saveCallLog(){
     console.log(props.reference_doc)
     console.log(_note.value)
@@ -197,7 +209,7 @@ const { width, height } = useWindowSize()
 const toggleCallWindow = () => { }
 let { style } = useDraggable(callPopup, {
     initialValue: { x: width.value - 580, y: height.value - 710 },
-    preventDefault: true,
+    preventDefault: false,
 })
 
 
