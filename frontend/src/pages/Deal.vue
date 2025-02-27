@@ -638,8 +638,8 @@ const dealContacts = createResource({
 
 function triggerCall() {
   let primaryContact = dealContacts.data?.find((c) => c.is_primary)
-  let mobile_no = primaryContact.mobile_no || null
-
+  let mobile_no = primaryContact?.mobile_no || null
+/*
   if (!primaryContact) {
     errorMessage(__('No primary contact set'))
     return
@@ -649,8 +649,9 @@ function triggerCall() {
     errorMessage(__('No mobile number set'))
     return
   }
+  */
 
-  makeCall(mobile_no, primaryContact)
+  makeCall(mobile_no, deal.data)
 }
 
 function updateField(name, value, callback) {

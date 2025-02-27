@@ -80,10 +80,7 @@
               </Tooltip>
               <div class="flex gap-1.5">
                 <Tooltip v-if="callEnabled" :text="__('Make a call')">
-                  <Button class="h-7 w-7" @click="() =>
-                      lead.data.mobile_no
-                        ? makeCall(lead.data.mobile_no, lead.data)
-                        : errorMessage(__('No phone number set'))
+                  <Button class="h-7 w-7" @click="() => makeCall(lead.data.mobile_no, lead.data)
                     ">
                     <PhoneIcon class="h-4 w-4" />
                   </Button>

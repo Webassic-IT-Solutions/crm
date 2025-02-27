@@ -11,14 +11,27 @@
             </div>
 
             <div class="flex flex-col items-center justify-center gap-3  cursor-move select-none ">
-                <Avatar :image="props.reference_doc?.lead_name.image" :label="props.reference_doc?.lead_name"
-                    class="relative flex !h-24 !w-24 items-center justify-center [&>div]:text-[30px]"
-                    :class="onCall || calling ? '' : 'pulse'" />
-                <div class="flex flex-col items-center justify-center gap-1">
-                    <div class="text-xl font-medium">
-                        {{ props.reference_doc?.lead_name }}
+                <div v-if="props.reference_doc?.doctype == 'CRM Lead'" class="flex flex-col" > 
+                    <Avatar :image="props.reference_doc?.lead_name.image" :label="props.reference_doc?.lead_name"
+                        class="relative flex !h-24 !w-24 items-center justify-center [&>div]:text-[30px]"
+                        :class="onCall || calling ? '' : 'pulse'" />
+                    <div class="flex flex-col items-center justify-center gap-1">
+                        <div class="text-xl font-medium">
+                            {{ props.reference_doc?.lead_name }}
+                        </div>
+                        <div class="text-sm text-ink-gray-5">{{ props.reference_doc?.mobile_no }}</div>
                     </div>
-                    <div class="text-sm text-ink-gray-5">{{ props.reference_doc?.mobile_no }}</div>
+                </div>
+                 <div v-if="props.reference_doc?.doctype == 'CRM Deal'" class="flex flex-col" > 
+                    <Avatar :image="props.reference_doc?.lead_name?.image" :label="props.reference_doc?.organization_name"
+                        class="relative flex !h-24 !w-24 items-center justify-center [&>div]:text-[30px]"
+                        :class="onCall || calling ? '' : 'pulse'" />
+                    <div class="flex flex-col items-center justify-center gap-1">
+                        <div class="text-xl font-medium">
+                            {{ props.reference_doc?.organization_name }}
+                        </div>
+                        <div class="text-sm text-ink-gray-5">{{ props.reference_doc?.mobile_no }}</div>
+                    </div>
                 </div>
                 <CountUpTimer ref="counterUp">
                     <div>{{ counterUp?.updatedTime }}</div>
