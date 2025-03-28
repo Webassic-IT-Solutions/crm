@@ -81,6 +81,15 @@
           :theme="statusColorMap[activity.status]"
         />
       </div>
+      <div>
+        <TextEditor
+          :content="activity.content"
+          :editable="false"
+          editor-class="!prose-sm max-w-none !text-sm text-ink-gray-5 focus:outline-none"
+          class="flex-1 overflow-hidden"
+        />
+      </div>
+
       <div
         v-if="activity.show_recording && activity.recording_url"
         class="flex flex-col items-center justify-between"
@@ -98,7 +107,7 @@ import MultipleAvatar from '@/components/MultipleAvatar.vue'
 import AudioPlayer from '@/components/Activities/AudioPlayer.vue'
 import { statusLabelMap, statusColorMap } from '@/utils/callLog.js'
 import { formatDate, timeAgo } from '@/utils'
-import { Avatar, Badge, Tooltip } from 'frappe-ui'
+import { Avatar, Badge, Tooltip, TextEditor } from 'frappe-ui'
 
 const props = defineProps({
   activity: Object,

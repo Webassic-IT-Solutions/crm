@@ -341,6 +341,9 @@ def get_linked_calls(name):
 			"note",
 		],
 	)
+	for item in calls:
+		note_content = frappe.db.get_value("FCRM Note", item.note, "content")  # Fetch attrnote content
+		item["content"] = note_content
 	return calls or []
 
 def get_linked_notes(name):
