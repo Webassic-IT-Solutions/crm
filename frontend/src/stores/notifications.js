@@ -30,7 +30,7 @@ export const notificationsStore = defineStore('crm-notifications', () => {
   function mark_doc_as_read(doc) {
     mark_as_read.params = { doc: doc }
     mark_as_read.reload()
-    toggle()
+    //toggle()
   }
 
   return {
