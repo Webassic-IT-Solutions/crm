@@ -1,20 +1,24 @@
-# Copyright (c) 2024, Frappe Technologies Pvt. Ltd. and contributors
-# For license information, please see license.txt
-
 import frappe
-from frappe import _
 from frappe.model.document import Document
+
 
 
 class CRMNotification(Document):
 	def on_update(self):
-		frappe.publish_realtime("crm_notification")
+		# Send real-time notification to the target user only
+		frappe.publish_realtime(
+			event="crm_notification",
+			message=self,
+			user=self.to_user
+		)
+
 
 def notify_user(args):
 	"""
-	Notify the assigned user
+	Create and send a CRM Notification to the assigned user, if different from the owner.
 	"""
 	args = frappe._dict(args)
+
 	if args.owner == args.assigned_to:
 		return
 
@@ -31,6 +35,8 @@ def notify_user(args):
 		reference_name=args.redirect_to_docname,
 	)
 
+	# Avoid duplicates
 	if frappe.db.exists("CRM Notification", values):
 		return
+
 	frappe.get_doc(values).insert(ignore_permissions=True)
