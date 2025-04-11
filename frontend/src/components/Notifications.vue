@@ -42,10 +42,10 @@
       >
         <RouterLink
           v-for="n in notifications.data"
-          :key="n.comment"
+          :key="n.name"
           :to="getRoute(n)"
           class="flex cursor-pointer items-start gap-2.5 px-4 py-2.5 hover:bg-surface-gray-2"
-          @click="markAsRead(n.comment || n.notification_type_doc)"
+          @click="markAsRead(n.name || n.notification_type_doc)"
         >
           <div class="mt-1 flex items-center gap-2.5">
             <div
@@ -220,7 +220,9 @@ onBeforeUnmount(() => {
 onMounted(() => {
   $socket.on('crm_notification', (notification) => {
     notifications.reload()
+    
     showPushNotification(notification)
+    
   })
 })
 
