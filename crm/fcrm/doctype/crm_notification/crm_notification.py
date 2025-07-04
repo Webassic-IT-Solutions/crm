@@ -28,7 +28,7 @@ def notify_user(args):
     if args.owner == args.assigned_to:
         return
 
-    # Allow control: skip duplicate check if flag is set
+    # Allow control: skip duplicate check if flag is set this
     if not args.get("allow_duplicates"):
         if frappe.db.exists("CRM Notification", {
             "to_user": args.assigned_to,

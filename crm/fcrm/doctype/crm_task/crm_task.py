@@ -3,8 +3,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.desk.form.assign_to import add as assign, remove as unassign
 from crm.fcrm.doctype.crm_notification.crm_notification import notify_user
-
-
+ 
+#main
 class CRMTask(Document):
     def after_insert(self):
         self.assign_to()
