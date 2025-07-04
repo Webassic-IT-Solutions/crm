@@ -11,35 +11,27 @@
     }"
   >
     <div class="flex h-screen flex-col text-ink-gray-9">
-      <div
-        class="z-20 flex items-center justify-between border-b bg-surface-white px-5 py-2.5"
-      >
+      <div class="z-20 flex items-center justify-between border-b bg-surface-white px-5 py-2.5">
         <div class="text-base font-medium">{{ __('Notifications') }}</div>
         <div class="flex gap-1">
           <Tooltip :text="__('Mark all as read')">
-            <div>
-              <Button variant="ghost" @click="() => markAllAsRead()">
-                <template #icon>
-                  <MarkAsDoneIcon class="h-4 w-4" />
-                </template>
-              </Button>
-            </div>
+            <Button variant="ghost" @click="markAllAsRead">
+              <template #icon>
+                <MarkAsDoneIcon class="h-4 w-4" />
+              </template>
+            </Button>
           </Tooltip>
           <Tooltip :text="__('Close')">
-            <div>
-              <Button variant="ghost" @click="() => toggle()">
-                <template #icon>
-                  <FeatherIcon name="x" class="h-4 w-4" />
-                </template>
-              </Button>
-            </div>
+            <Button variant="ghost" @click="toggle">
+              <template #icon>
+                <FeatherIcon name="x" class="h-4 w-4" />
+              </template>
+            </Button>
           </Tooltip>
         </div>
       </div>
-      <div
-        v-if="notifications.data?.length"
-        class="divide-y divide-outline-gray-modals overflow-auto text-base"
-      >
+
+      <div v-if="notifications.data?.length" class="divide-y divide-outline-gray-modals overflow-auto text-base">
         <RouterLink
           v-for="n in notifications.data"
           :key="n.name"
@@ -74,10 +66,8 @@
           </div>
         </RouterLink>
       </div>
-      <div
-        v-else
-        class="flex flex-1 flex-col items-center justify-center gap-2"
-      >
+
+      <div v-else class="flex flex-1 flex-col items-center justify-center gap-2">
         <NotificationsIcon class="h-20 w-20 text-ink-gray-2" />
         <div class="text-lg font-medium text-ink-gray-4">
           {{ __('No new notifications') }}
@@ -85,6 +75,7 @@
       </div>
     </div>
   </div>
+
   <!-- In-app Popup -->
   <Transition name="fade">
     <div
@@ -101,7 +92,7 @@
     </div>
   </Transition>
 
-  <!-- Audio element for notification sound -->
+  <!-- Audio -->
   <audio ref="notificationSound" src="/notification.mp3" preload="auto" />
 </template>
 
@@ -125,15 +116,9 @@ import { timeAgo } from '@/utils'
 const { $socket } = globalStore()
 const { mark_as_read, toggle, mark_doc_as_read } = notificationsStore()
 const target = ref(null)
-onClickOutside(
-  target,
-  () => {
-    if (visible.value) toggle()
-  },
-  {
-    ignore: ['#notifications-btn'],
-  },
-)
+onClickOutside(target, () => visible.value && toggle(), {
+  ignore: ['#notifications-btn'],
+})
 
 const showPopup = ref(false)
 const popupNotification = ref(null)
@@ -145,11 +130,9 @@ function requestNotificationPermission() {
     console.warn("This browser does not support desktop notifications.")
     return
   }
-
   Notification.requestPermission().then(permission => {
     console.log("Notification permission:", permission)
     notificationPermission.value = permission
-
     if (permission === "granted") {
       new Notification("🎉 Notifications Enabled!", {
         icon: "/notification-icon.png",
@@ -170,7 +153,6 @@ function playNotificationSound() {
 
 function showPushNotification(notification) {
   console.log("Notification received:", notification)
-
   if (notificationPermission.value === 'granted') {
     playNotificationSound()
     new Notification(notification.title || 'New Notification', {
@@ -180,7 +162,6 @@ function showPushNotification(notification) {
     })
     return
   }
-
   if (notificationPermission.value === 'default') {
     Notification.requestPermission().then(permission => {
       notificationPermission.value = permission
@@ -220,32 +201,14 @@ onBeforeUnmount(() => {
 onMounted(() => {
   $socket.on('crm_notification', (notification) => {
     notifications.reload()
-    
     showPushNotification(notification)
-    
   })
 })
 
+// ✅ FINAL FIXED ROUTE: always go to Tasks only
 function getRoute(notification) {
-  if(!notification.reference_name){
-    return {
-      name: "Tasks"
-    }
-
-  }
-  let params = {
-    leadId: notification.reference_name,
-  }
-  if (notification.route_name === 'Deal') {
-    params = {
-      dealId: notification.reference_name,
-    }
-  }
-
   return {
-    name: notification.route_name,
-    params: params,
-    hash: notification.hash,
+    name: "Tasks"
   }
 }
 </script>
