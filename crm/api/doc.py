@@ -232,12 +232,16 @@ def get_data(
 		if isinstance(value, list):
 			if "@me" in value:
 				value[value.index("@me")] = frappe.session.user
+			if "@today" in value:
+				value[value.index("@today")] = frappe.utils.today()
 			elif "%@me%" in value:
 				index = [i for i, v in enumerate(value) if v == "%@me%"]
 				for i in index:
 					value[i] = "%" + frappe.session.user + "%"
 		elif value == "@me":
 			filters[key] = frappe.session.user
+		elif value == "@today":
+			filters[key] = frappe.utils.today()
 
 	if default_filters:
 		default_filters = frappe.parse_json(default_filters)
@@ -632,3 +636,18 @@ def getCounts(d, doctype):
 		"FCRM Note", filters={"reference_doctype": doctype, "reference_docname": d.get("name")}
 	)
 	return d
+
+
+def get_permission_query_conditions(user):
+    if not user or user == "Administrator":
+        return ""
+    else:
+        return f"""(`owner` = "{user}" or assigned_to = "{user}")"""
+
+
+def has_permission(doc, ptype, user):
+	if user == "Administrator":
+		return True
+	elif doc.owner == user or doc.assigned_to == user:
+		return True
+	return False
