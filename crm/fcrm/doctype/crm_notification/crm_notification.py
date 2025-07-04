@@ -11,7 +11,6 @@ class CRMNotification(Document):
                 "to_user": self.to_user,
                 "notification_text": self.notification_text,
                 "creation": str(self.creation),
-                # ✅ ✅ ✅ Send only ONE routing key: force it
                 "route_name": "Tasks",
                 "hash": self.reference_name if self.reference_name else None
             },
@@ -25,23 +24,24 @@ def notify_user(args):
     """
     args = frappe._dict(args)
 
-    
+    # Prevent notifying self
     if args.owner == args.assigned_to:
         return
 
-    
-    if frappe.db.exists("CRM Notification", {
-        "to_user": args.assigned_to,
-        "reference_doctype": args.redirect_to_doctype,
-        "reference_name": args.redirect_to_docname,
-        "type": args.notification_type 
-    }):
-        return
+    # Allow control: skip duplicate check if flag is set
+    if not args.get("allow_duplicates"):
+        if frappe.db.exists("CRM Notification", {
+            "to_user": args.assigned_to,
+            "reference_doctype": args.redirect_to_doctype,
+            "reference_name": args.redirect_to_docname,
+            "type": args.notification_type 
+        }):
+            return
 
     values = frappe._dict(
         doctype="CRM Notification",
-        from_user=args.owner, 
-        to_user=args.assigned_to, 
+        from_user=args.owner,
+        to_user=args.assigned_to,
         type=args.notification_type,
         message=args.message,
         notification_text=args.notification_text,

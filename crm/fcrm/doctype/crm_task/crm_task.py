@@ -1,36 +1,32 @@
-
-
 import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.desk.form.assign_to import add as assign, remove as unassign
 from crm.fcrm.doctype.crm_notification.crm_notification import notify_user
 
+
 class CRMTask(Document):
     def after_insert(self):
         self.assign_to()
 
-    def validate(self):
-        
+    def before_save(self):
+        # Check if update is not by owner, always notify
         if not self.is_new():
-            # Get the document before changes were saved
-            before = self.get_doc_before_save()
+            # Don't notify if owner is editing their own task
+            if self.owner and frappe.session.user != self.owner:
+                self.notify_owner_on_update()
 
-            # If assigned_to has changed, handle unassignment and new assignment
+            # If assigned_to changed, handle reassignment
+            before = self.get_doc_before_save()
             if before and before.assigned_to != self.assigned_to:
                 self.unassign_from_previous_user(before.assigned_to)
                 self.assign_to()
-
-            # Check if any field relevant to an update notification has change
-            if before and (before.status != self.status or before.priority != self.priority or before.due_date != self.due_date or before.title != self.title or before.description != self.description):
-                self.notify_owner_on_update()
 
     def unassign_from_previous_user(self, user):
         unassign(self.doctype, self.name, user)
 
     def assign_to(self):
         if self.assigned_to:
-            # Add Frappe core assignment
             assign({
                 "assign_to": [self.assigned_to],
                 "doctype": self.doctype,
@@ -38,7 +34,6 @@ class CRMTask(Document):
                 "description": self.title or self.description,
             })
 
-            # Send CRM Notification for assignment
             notify_user({
                 "owner": self.owner,
                 "assigned_to": self.assigned_to,
@@ -52,19 +47,20 @@ class CRMTask(Document):
             })
 
     def notify_owner_on_update(self):
-        
-        if self.owner and self.owner != frappe.session.user:
-            notify_user({
-                "owner": frappe.session.user,  
-                "assigned_to": self.owner,     
-                "notification_type": "Task",
-                "message": f"Task {self.name} has been updated",
-                "notification_text": f"Task '{self.title}' (assigned by you) has been updated by {frappe.session.user}.",
-                "reference_doctype": self.doctype,
-                "reference_docname": self.name,
-                "redirect_to_doctype": self.doctype,
-                "redirect_to_docname": self.name,
-            })
+        frappe.logger().info(f"📣 Notifying owner {self.owner} about update by {frappe.session.user}")
+
+        notify_user({
+            "owner": frappe.session.user,
+            "assigned_to": self.owner,
+            "notification_type": "Task",
+            "message": f"Task {self.name} has been updated",
+            "notification_text": f"Task '{self.title}' has been updated by {frappe.session.user}.",
+            "reference_doctype": self.doctype,
+            "reference_docname": self.name,
+            "redirect_to_doctype": self.doctype,
+            "redirect_to_docname": self.name,
+            "allow_duplicates": True
+        })
 
     @staticmethod
     def default_list_data():
