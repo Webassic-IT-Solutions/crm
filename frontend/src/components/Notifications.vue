@@ -233,19 +233,27 @@ function getRoute(notification) {
     }
 
   }
-  let params = {
-    leadId: notification.reference_name,
-  }
-  if (notification.route_name === 'Deal') {
+  let params = {}
+  if (notification.route_name === 'Deal' || notification.route_name === 'Lead') {
     params = {
-      dealId: notification.reference_name,
+      leadId: notification.reference_name,
     }
-  }
 
-  return {
-    name: notification.route_name,
-    params: params,
-    hash: notification.hash,
+    if (notification.route_name === 'Deal') {
+      params = {
+        dealId: notification.reference_name,
+      }
+    }
+
+    return {
+      name: notification.route_name,
+      params: params,
+      hash: notification.hash,
+    }
+  } else {
+    return {
+      name: "Tasks"
+    }
   }
 }
 </script>
