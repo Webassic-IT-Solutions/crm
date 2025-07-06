@@ -16,6 +16,17 @@
       >
         <div class="text-base font-medium">{{ __('Notifications') }}</div>
         <div class="flex gap-1">
+
+          <Tooltip :text="__('Close')">
+            <div>
+              <Button variant="ghost" @click="() => refresh()">
+                <template #icon>
+                  <RefreshIcon name="x" class="h-4 w-4" />
+                </template>
+              </Button>
+            </div>
+          </Tooltip>
+
           <Tooltip :text="__('Mark all as read')">
             <div>
               <Button variant="ghost" @click="() => markAllAsRead()">
@@ -113,6 +124,7 @@ import { Tooltip } from 'frappe-ui'
 import WhatsAppIcon from '@/components/Icons/WhatsAppIcon.vue'
 import MarkAsDoneIcon from '@/components/Icons/MarkAsDoneIcon.vue'
 import NotificationsIcon from '@/components/Icons/NotificationsIcon.vue'
+import RefreshIcon from '@/components/Icons/RefreshIcon.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import {
   visible,
@@ -212,6 +224,9 @@ function markAllAsRead() {
   capture('notification_mark_all_as_read')
   mark_as_read.reload()
 }
+function refresh(){
+  notifications.reload()
+}
 
 onBeforeUnmount(() => {
   $socket.off('crm_notification')
@@ -219,7 +234,9 @@ onBeforeUnmount(() => {
 
 onMounted(() => {
   $socket.on('crm_notification', (notification) => {
-    notifications.reload()
+    setTimeout(()=>{
+      notifications.reload()
+    }, 0)
     
     showPushNotification(notification)
     
