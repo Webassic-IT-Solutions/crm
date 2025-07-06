@@ -21,8 +21,10 @@ class CRMTask(Document):
 			self.assign_to()
 
 	def on_update(self):
+		if self.is_new():
+			return
 		before_save_doc = self.get_doc_before_save()
-		if ( before_save_doc.status != self.status 
+		if before_save_doc and ( before_save_doc.status != self.status 
 	  		or before_save_doc.due_date != self.due_date
 			or before_save_doc.description != self.description ):
 			notify_task_owner_onupdate(self)
