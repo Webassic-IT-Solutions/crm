@@ -102,7 +102,7 @@
   </Transition>
 
   <!-- Audio element for notification sound -->
-  <audio ref="notificationSound" src="/notification.mp3" preload="auto" />
+  <audio ref="notificationSound" src="/assets/crm/frontend/notification.mp3" preload="auto" />
 </template>
 
 <script setup>

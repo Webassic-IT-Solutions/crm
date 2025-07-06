@@ -20,6 +20,14 @@ class CRMTask(Document):
 			self.unassign_from_previous_user(self.get_doc_before_save().assigned_to)
 			self.assign_to()
 
+	def on_update(self):
+		before_save_doc = self.get_doc_before_save()
+		if ( before_save_doc.status != self.status 
+	  		or before_save_doc.due_date != self.due_date
+			or before_save_doc.description != self.description ):
+			notify_task_owner_onupdate(self)
+
+
 	def unassign_from_previous_user(self, user):
 		unassign(self.doctype, self.name, user)
 
@@ -95,3 +103,37 @@ class CRMTask(Document):
 			"title_field": "title",
 			"kanban_fields": '["description", "priority", "creation"]'
 		}
+
+
+def notify_task_owner_onupdate(doc):
+    _doc = doc
+    updated_by_name = frappe.get_cached_value("User", frappe.session.user, "full_name")
+    notification_text = f"""
+            <div class="mb-2 leading-5 text-ink-gray-5">
+                <span class="font-medium text-ink-gray-9">{ updated_by_name }</span>
+                <span>{ _('has updated task {0} ').format(
+                    f'<span class="font-medium text-ink-gray-9">{ doc.title }</span>'
+                ) }</span>
+            </div>
+        """
+
+    message = (
+        _("{0} {1} has been updated by {2}").format(
+            doc.doctype, doc.name, updated_by_name
+        )
+    )
+
+
+    notify_user(
+        {
+            "owner": frappe.session.user,
+            "assigned_to": doc.owner if doc.owner != frappe.session.user else doc.assigned_to,
+            "notification_type": "Task",
+            "message": message,
+            "notification_text": notification_text,
+            "reference_doctype": doc.doctype,
+            "reference_docname": doc.name,
+            "redirect_to_doctype": doc.doctype,
+            "redirect_to_docname": doc.name,
+        }
+    )

@@ -6,6 +6,7 @@ from frappe.model.document import Document
 class CRMNotification(Document):
 	def after_insert(self):
 		# Send real-time notification to the target user only
+		print(F"Send notification {frappe.as_json(self)}")
 		frappe.publish_realtime(
 			event="crm_notification",
 			message=self,

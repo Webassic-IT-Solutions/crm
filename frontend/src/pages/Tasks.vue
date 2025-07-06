@@ -208,8 +208,9 @@ import { getMeta } from '@/stores/meta'
 import { usersStore } from '@/stores/users'
 import { formatDate, timeAgo } from '@/utils'
 import { Tooltip, Avatar, TextEditor, Dropdown, call } from 'frappe-ui'
-import { computed, ref } from 'vue'
+import { computed, inject, ref, onMounted, onBeforeUnmount } from "vue"
 import { useRouter } from 'vue-router'
+
 
 const { getFormattedPercent, getFormattedFloat, getFormattedCurrency } =
   getMeta('CRM Task')
@@ -384,4 +385,14 @@ function redirect(doctype, docname) {
   }
   router.push({ name: name, params: params })
 }
+const DOCTYPE = "CRM Task";
+
+onMounted(() => {
+  console.log(`${DOCTYPE} onMounted`)
+})
+
+onBeforeUnmount(() => {
+  console.log(`${DOCTYPE} onBeforeUnmount`)
+})
+
 </script>
