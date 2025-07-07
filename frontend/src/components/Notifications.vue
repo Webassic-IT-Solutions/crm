@@ -103,9 +103,9 @@
       class="fixed bottom-5 right-5 z-50 max-w-sm rounded-lg bg-white p-4 shadow-lg border border-gray-200"
     >
       <div class="flex items-start gap-3">
-        <UserAvatar v-if="popupNotification" :user="popupNotification.from_user?.name || ''" size="md" />
+        <UserAvatar v-if="popupNotification" :user="popupNotification.from_user || ''" size="md" />
         <div>
-          <div class="text-sm font-medium">{{ popupNotification?.from_user?.full_name || 'Someone' }}</div>
+          <div class="text-sm font-medium">{{ popupNotification?.from_user || 'Someone' }}</div>
           <div class="text-sm text-gray-700" v-html="popupNotification?.notification_text" />
         </div>
       </div>
