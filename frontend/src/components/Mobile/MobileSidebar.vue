@@ -81,6 +81,25 @@
       </TransitionChild>
     </Dialog>
   </TransitionRoot>
+
+
+  <!-- In-app Popup -->
+  <Transition name="fade">
+    <div
+      v-if="showPopup"
+      class="fixed bottom-5 right-5 z-50 max-w-sm rounded-lg bg-white p-4 shadow-lg border border-gray-200"
+    >
+      <div class="flex items-start gap-3">
+        <UserAvatar v-if="popupNotification" :user="popupNotification.from_user || ''" size="md" />
+        <div>
+          <div class="text-sm font-medium">{{ popupNotification?.from_user || 'Someone' }}</div>
+          <div class="text-sm text-gray-700" v-html="popupNotification?.notification_text" />
+        </div>
+      </div>
+    </div>
+  </Transition>
+  <!-- Audio element for notification sound -->
+  <audio ref="notificationSound" src="/assets/crm/frontend/notification.mp3" preload="auto" />
 </template>
 <script setup>
 import {
@@ -103,10 +122,12 @@ import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
 import NotificationsIcon from '@/components/Icons/NotificationsIcon.vue'
 import SidebarLink from '@/components/SidebarLink.vue'
 import { viewsStore } from '@/stores/views'
-import { unreadNotificationsCount } from '@/stores/notifications'
-import { TrialBanner, createResource } from 'frappe-ui'
-import { computed, h, provide } from 'vue'
+import { unreadNotificationsCount, notifications } from '@/stores/notifications'
+import { computed, h } from 'vue'
+import {ref, onBeforeUnmount, onMounted } from 'vue'
+
 import { mobileSidebarOpened as sidebarOpened } from '@/composables/settings'
+import { globalStore } from '@/stores/global'
 
 const { getPinnedViews, getPublicViews } = viewsStore()
 
@@ -214,4 +235,89 @@ function getIcon(routeName, icon) {
       return PinIcon
   }
 }
+
+const { $socket } = globalStore()
+const showPopup = ref(false)
+const popupNotification = ref(null)
+const notificationPermission = ref(Notification.permission)
+const notificationSound = ref(null)
+
+function requestNotificationPermission() {
+  if (!("Notification" in window)) {
+    console.warn("This browser does not support desktop notifications.")
+    return
+  }
+
+  Notification.requestPermission().then(permission => {
+    console.log("Notification permission:", permission)
+    notificationPermission.value = permission
+
+    if (permission === "granted") {
+      new Notification("🎉 Notifications Enabled!", {
+        icon: "/notification-icon.png",
+        tag: "frappe-notification"
+      })
+    }
+  })
+}
+
+function playNotificationSound() {
+  if (notificationSound.value) {
+    notificationSound.value.currentTime = 0
+    notificationSound.value.play().catch(err => {
+      console.warn('Sound playback failed:', err)
+    })
+  }
+}
+
+function showPushNotification(notification) {
+  console.log("Notification received:", notification)
+
+  if (notificationPermission.value === 'granted') {
+    playNotificationSound()
+    new Notification(notification.title || 'New Notification', {
+      body: notification.message || notification.notification_text || 'You have a new notification',
+      icon: '/notification-icon.png',
+      tag: notification.notification_type_doc,
+    })
+    return
+  }
+
+  if (notificationPermission.value === 'default') {
+    Notification.requestPermission().then(permission => {
+      notificationPermission.value = permission
+      if (permission === 'granted') {
+        showPushNotification(notification)
+      } else {
+        showInAppPopup(notification)
+      }
+    })
+  } else {
+    showInAppPopup(notification)
+  }
+}
+
+function showInAppPopup(notification) {
+  console.log("In-app popup notification:", notification)
+  playNotificationSound()
+  popupNotification.value = notification
+  showPopup.value = true
+  setTimeout(() => (showPopup.value = false), 30000)
+}
+onBeforeUnmount(() => {
+  $socket.off('crm_notification')
+})
+
+onMounted(() => {
+  console.log("crm_notification subscribed")
+  $socket.on('crm_notification', (notification) => {
+    setTimeout(()=>{
+      console.log("crm_notification reload")
+      notifications.reload()
+    }, 1000);
+
+    console.log("crm_notification showPushNotification")
+    showPushNotification(notification)
+  })
+})
 </script>

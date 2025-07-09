@@ -210,6 +210,8 @@ import { formatDate, timeAgo } from '@/utils'
 import { Tooltip, Avatar, TextEditor, Dropdown, call } from 'frappe-ui'
 import { computed, inject, ref, onMounted, onBeforeUnmount } from "vue"
 import { useRouter } from 'vue-router'
+import { globalStore } from '@/stores/global'
+import { watch } from 'vue'
 
 
 const { getFormattedPercent, getFormattedFloat, getFormattedCurrency } =
@@ -386,13 +388,29 @@ function redirect(doctype, docname) {
   router.push({ name: name, params: params })
 }
 const DOCTYPE = "CRM Task";
+const { $socket } = globalStore()
+
+import {
+  notifications,
+} from '@/stores/notifications'
+
+watch(() => notifications, (newVal, oldVal) => {
+  tasks.value.reload()
+}, { deep: true }) // Use deep watch since notifications is a reactive array
 
 onMounted(() => {
   console.log(`${DOCTYPE} onMounted`)
+ // $socket.off('crm_notification')
 })
 
 onBeforeUnmount(() => {
   console.log(`${DOCTYPE} onBeforeUnmount`)
+  // $socket.on('crm_notification', (notification) => {
+  //   setTimeout(()=>{
+  //     console.log("crm_notification reload")
+  //     tasks.value.reload()
+  //   }, 1000);
+  // })
 })
 
 </script>

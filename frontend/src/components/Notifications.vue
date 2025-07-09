@@ -236,7 +236,7 @@ onMounted(() => {
   $socket.on('crm_notification', (notification) => {
     setTimeout(()=>{
       notifications.reload()
-    }, 0)
+    }, 1000)
     
     showPushNotification(notification)
     

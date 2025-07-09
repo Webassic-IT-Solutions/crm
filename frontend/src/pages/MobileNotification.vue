@@ -85,15 +85,15 @@ const { $socket } = globalStore()
 const { mark_as_read, mark_doc_as_read } = notificationsStore()
 
 onBeforeUnmount(() => {
-  $socket.off('crm_notification')
+  //$socket.off('crm_notification')
 })
 
 onMounted(() => {
-  $socket.on('crm_notification', () => {
-    setTimeout(()=>{
-      notifications.reload()
-    }, 0)
-  })
+  // $socket.on('crm_notification', () => {
+  //   setTimeout(()=>{
+  //     notifications.reload()
+  //   }, 0)
+  // })
 })
 
 
