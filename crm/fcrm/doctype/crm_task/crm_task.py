@@ -139,3 +139,51 @@ def notify_task_owner_onupdate(doc):
             "redirect_to_docname": doc.name,
         }
     )
+
+#logic for reminder for evry 2 minutes it has to reminde
+
+from frappe.utils import now_datetime
+
+def send_overdue_task_reminders():
+	overdue_tasks = frappe.db.sql(
+		"""
+		SELECT assigned_to, COUNT(*) as task_count
+		FROM `tabCRM Task`
+		WHERE
+			due_date < NOW()
+			AND status != 'Completed'
+			AND assigned_to IS NOT NULL
+		GROUP BY assigned_to
+		""",
+		(),
+		as_dict=True,
+	)
+
+	for record in overdue_tasks:
+		user = record.assigned_to
+		owner = "Administrator"
+		count = record.task_count
+
+		if count > 0:
+			message = f"You have {count} tasks that are overdue."
+			notification_text = f"""
+				<div class="mb-2 leading-5 text-ink-gray-5">
+					<span class="font-medium text-ink-gray-9">Reminder</span>
+					<span>: You have <strong>{count}</strong> tasks that are overdue. Please review them.</span>
+				</div>
+			"""
+
+			notify_user(
+				{
+      
+					"owner": owner,
+					"assigned_to": user,
+					"notification_type": "Task",
+					"message": message,
+					"notification_text": notification_text,
+					"reference_doctype": "CRM Task",
+					"reference_docname": None,
+					"redirect_to_doctype": "CRM Task",
+					"redirect_to_docname": None,
+				}
+			)

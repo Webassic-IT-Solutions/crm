@@ -167,6 +167,16 @@ doc_events = {
 
 # Scheduled Tasks
 # ---------------
+scheduler_events = {
+	# "cron": {
+	# 	"*/2 * * * *": [
+	# 		"crm.fcrm.doctype.crm_task.crm_task.send_overdue_task_reminders"
+	# 	]
+	# }
+  "daily": [
+		"crm.fcrm.doctype.crm_task.crm_task.send_overdue_task_reminders"	
+	]
+}
 
 # scheduler_events = {
 # "all": [
