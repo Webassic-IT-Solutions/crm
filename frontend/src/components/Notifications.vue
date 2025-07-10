@@ -97,20 +97,39 @@
     </div>
   </div>
   <!-- In-app Popup -->
-  <Transition name="fade">
-    <div
-      v-if="showPopup"
-      class="fixed bottom-5 right-5 z-50 max-w-sm rounded-lg bg-white p-4 shadow-lg border border-gray-200"
-    >
+<Transition name="fade">
+  <div
+    v-if="showPopup"
+    class="fixed bottom-5 right-5 z-50 max-w-sm rounded-lg bg-white p-4 shadow-lg border border-gray-200"
+  >
+    <div class="flex items-start justify-between gap-3">
       <div class="flex items-start gap-3">
-        <UserAvatar v-if="popupNotification" :user="popupNotification.from_user || ''" size="md" />
+        <UserAvatar
+          v-if="popupNotification"
+          :user="popupNotification.from_user || ''"
+          size="md"
+        />
         <div>
-          <div class="text-sm font-medium">{{ popupNotification?.from_user || 'Someone' }}</div>
-          <div class="text-sm text-gray-700" v-html="popupNotification?.notification_text" />
+          <div class="text-sm font-medium">
+            {{ popupNotification?.from_user || 'Someone' }}
+          </div>
+          <div
+            class="text-sm text-gray-700"
+            v-html="popupNotification?.notification_text"
+          />
         </div>
       </div>
+      <!-- ✅ Manual close button -->
+      <button
+        @click="closePopup"
+        class="ml-2 text-gray-500 hover:text-gray-700"
+      >
+        ✕
+      </button>
     </div>
-  </Transition>
+  </div>
+</Transition>
+
 
   <!-- Audio element for notification sound -->
   <audio ref="notificationSound" src="/assets/crm/frontend/notification.mp3" preload="auto" />
@@ -151,6 +170,7 @@ const showPopup = ref(false)
 const popupNotification = ref(null)
 const notificationPermission = ref(Notification.permission)
 const notificationSound = ref(null)
+const popupTimeout = ref(null)
 
 function requestNotificationPermission() {
   if (!("Notification" in window)) {
@@ -212,12 +232,32 @@ function showInAppPopup(notification) {
   playNotificationSound()
   popupNotification.value = notification
   showPopup.value = true
-  setTimeout(() => (showPopup.value = false), 30000)
+
+  // Clear any previous timeout to avoid overlapping
+  if (popupTimeout.value) clearTimeout(popupTimeout.value)
+
+  
+  popupTimeout.value = setTimeout(() => {
+    showPopup.value = false
+    popupTimeout.value = null
+  }, 20000)
+}
+
+function closePopup() {
+  showPopup.value = false
+  if (popupTimeout.value) {
+    clearTimeout(popupTimeout.value)
+    popupTimeout.value = null
+  }
 }
 
 function markAsRead(doc) {
   capture('notification_mark_as_read')
   mark_doc_as_read(doc)
+  
+  if (visible.value) {
+    toggle()
+  }
 }
 
 function markAllAsRead() {
