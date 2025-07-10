@@ -639,15 +639,10 @@ def getCounts(d, doctype):
 
 
 def get_permission_query_conditions(user):
-    if not user or user == "Administrator":
-        return ""
-    else:
-        return f"""(`owner` = "{user}" or assigned_to = "{user}")"""
+    return f"""(`owner` = "{user}" or assigned_to = "{user}")"""
 
 
 def has_permission(doc, ptype, user):
-	if user == "Administrator":
-		return True
-	elif doc.owner == user or doc.assigned_to == user:
+	if doc.owner == user or doc.assigned_to == user:
 		return True
 	return False

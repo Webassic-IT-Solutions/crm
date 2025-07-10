@@ -21,6 +21,7 @@
               v-if="!isSidebarCollapsed && unreadNotificationsCount"
               :label="unreadNotificationsCount"
               variant="subtle"
+              theme="red"
             />
             <div
               v-else-if="unreadNotificationsCount"

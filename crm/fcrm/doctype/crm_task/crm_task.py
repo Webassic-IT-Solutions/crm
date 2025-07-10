@@ -121,7 +121,7 @@ def notify_task_owner_onupdate(doc):
 
     message = (
         _("{0} {1} has been updated by {2}").format(
-            doc.doctype, doc.name, updated_by_name
+            doc.doctype, doc.title, updated_by_name
         )
     )
 

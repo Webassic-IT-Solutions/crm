@@ -30,6 +30,7 @@
                     v-if="unreadNotificationsCount"
                     :label="unreadNotificationsCount"
                     variant="subtle"
+                    theme="red"
                   />
                 </template>
               </SidebarLink>

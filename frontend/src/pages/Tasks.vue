@@ -2,7 +2,14 @@
   <LayoutHeader>
     <template #left-header>
       <ViewBreadcrumbs v-model="viewControls" routeName="Tasks" />
-    </template>
+      <!-- <span v-if="tasks?.data" style="color:red"> Total: {{ tasks?.data?.total_count }} </span> -->
+      <Badge
+        v-if="tasks?.data && tasks?.data.total_count"
+        :label="isMobile ? `${tasks?.data.total_count}` : `Total: ${tasks?.data.total_count}`"
+        theme="red"
+        size="lg"
+      />
+    </template>  
     <template #right-header>
       <CustomActions
         v-if="tasksListView?.customListActions"
@@ -207,7 +214,7 @@ import TaskModal from '@/components/Modals/TaskModal.vue'
 import { getMeta } from '@/stores/meta'
 import { usersStore } from '@/stores/users'
 import { formatDate, timeAgo } from '@/utils'
-import { Tooltip, Avatar, TextEditor, Dropdown, call } from 'frappe-ui'
+import { Tooltip, Avatar, TextEditor, Dropdown, call, Badge } from 'frappe-ui'
 import { computed, inject, ref, onMounted, onBeforeUnmount } from "vue"
 import { useRouter } from 'vue-router'
 import { globalStore } from '@/stores/global'
@@ -228,6 +235,8 @@ const loadMore = ref(1)
 const triggerResize = ref(1)
 const updatedPageCount = ref(20)
 const viewControls = ref(null)
+
+const isMobile = ref(false)
 
 function getRow(name, field) {
   function getValue(value) {
@@ -401,6 +410,7 @@ watch(() => notifications, (newVal, oldVal) => {
 onMounted(() => {
   console.log(`${DOCTYPE} onMounted`)
  // $socket.off('crm_notification')
+  isMobile.value = window.innerWidth <= 768
 })
 
 onBeforeUnmount(() => {
