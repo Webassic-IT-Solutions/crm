@@ -15,11 +15,11 @@
         <div class="text-base font-medium">{{ __('Notifications') }}</div>
         <div class="flex gap-1">
 
-          <Tooltip :text="__('Close')">
+          <Tooltip :text="__('Reset')">
             <div>
               <Button variant="ghost" @click="() => refresh()">
                 <template #icon>
-                  <RefreshIcon name="x" class="h-4 w-4" />
+                  <RefreshIcon name="reset" class="h-4 w-4" />
                 </template>
               </Button>
             </div>
@@ -92,14 +92,14 @@
           {{ __('No new notifications') }}
         </div>
       </div>
-      <div v-if="has_more()" class="text-center">
+      <div v-if="has_more()" class="text-center gap-2 border-t px-3 py-2 sm:px-5">
           <Button 
             variant="ghost" 
             @click="() => load_page()"
             :label="__('Load More')"
           >
           </Button>
-        </div>
+      </div>
     </div>
   </div>
   <!-- In-app Popup -->
@@ -276,7 +276,7 @@ function refresh(){
 }
 function load_page(){
   if(notificationsResource)
-  load_next_page()
+    load_next_page()
 }
 
 onBeforeUnmount(() => {

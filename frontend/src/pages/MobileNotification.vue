@@ -8,18 +8,30 @@
       />
     </template>
     <template #right-header>
-      <Tooltip :text="__('Mark all as read')">
-        <div>
-          <Button
-            :label="__('Mark all as read')"
-            @click="() => mark_as_read.reload()"
-          >
-            <template #prefix>
-              <MarkAsDoneIcon class="h-4 w-4" />
-            </template>
-          </Button>
-        </div>
-      </Tooltip>
+      <div class="flex flex-row gap-1">
+        <Tooltip :text="__('Reset')">
+          <div>
+            <Button :label="__('Reset')" @click="() => reset()">
+              <template #icon>
+                <RefreshIcon name="reset" class="h-4 w-4" />
+              </template>
+            </Button>
+          </div>
+        </Tooltip>
+        <Tooltip :text="__('Mark all as read')">
+          <div>
+            <Button
+              :label="__('Mark all as read')"
+              @click="() => mark_as_read.reload()"
+            >
+              <template #prefix>
+                <MarkAsDoneIcon class="h-4 w-4" />
+              </template>
+            </Button>
+          </div>
+        </Tooltip>
+      </div>
+      
     </template>
   </LayoutHeader>
   <div class="flex flex-col overflow-hidden text-ink-gray-9">
@@ -68,22 +80,35 @@
       </div>
     </div>
   </div>
+  <div v-if="has_more()" class="text-center gap-2 border-t px-3 py-2 sm:px-5">
+    <Button
+      @click="() => load_page()"
+      :label="__('Load More')"
+    >
+    </Button>
+  </div>
 </template>
 <script setup>
 import LayoutHeader from '@/components/LayoutHeader.vue'
 import WhatsAppIcon from '@/components/Icons/WhatsAppIcon.vue'
 import MarkAsDoneIcon from '@/components/Icons/MarkAsDoneIcon.vue'
 import NotificationsIcon from '@/components/Icons/NotificationsIcon.vue'
+import RefreshIcon from '@/components/Icons/RefreshIcon.vue'
+
 import UserAvatar from '@/components/UserAvatar.vue'
-import { notifications, notificationsStore } from '@/stores/notifications'
+import { notifications, notificationsStore, notificationsResource } from '@/stores/notifications'
 import { globalStore } from '@/stores/global'
 import { timeAgo } from '@/utils'
 import { Breadcrumbs, Tooltip } from 'frappe-ui'
 import { onMounted, onBeforeUnmount } from 'vue'
 
 const { $socket } = globalStore()
-const { mark_as_read, mark_doc_as_read } = notificationsStore()
+const { mark_as_read, mark_doc_as_read, load_next_page, reset, has_more } = notificationsStore()
 
+function load_page(){
+  if(notificationsResource)
+    load_next_page()
+}
 onBeforeUnmount(() => {
   //$socket.off('crm_notification')
 })
