@@ -187,3 +187,4 @@ def send_overdue_task_reminders():
 					"redirect_to_docname": None,
 				}
 			)
+	frappe.db.commit()
