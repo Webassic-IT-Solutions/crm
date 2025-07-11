@@ -91,7 +91,7 @@ onBeforeUnmount(() => {
 onMounted(() => {
   // $socket.on('crm_notification', () => {
   //   setTimeout(()=>{
-  //     notifications.reload()
+  //     notificationsResource.reload()
   //   }, 0)
   // })
 })

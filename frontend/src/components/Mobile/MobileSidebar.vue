@@ -123,7 +123,7 @@ import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
 import NotificationsIcon from '@/components/Icons/NotificationsIcon.vue'
 import SidebarLink from '@/components/SidebarLink.vue'
 import { viewsStore } from '@/stores/views'
-import { unreadNotificationsCount, notifications } from '@/stores/notifications'
+import { unreadNotificationsCount, notificationsResource } from '@/stores/notifications'
 import { computed, h } from 'vue'
 import {ref, onBeforeUnmount, onMounted } from 'vue'
 
@@ -314,7 +314,7 @@ onMounted(() => {
   $socket.on('crm_notification', (notification) => {
     setTimeout(()=>{
       console.log("crm_notification reload")
-      notifications.reload()
+      notificationsResource.reload()
     }, 1000);
 
     console.log("crm_notification showPushNotification")

@@ -1,17 +1,38 @@
 import frappe
 from frappe.query_builder import Order
+from frappe.query_builder.functions import Count
 
 
 @frappe.whitelist()
-def get_notifications():
+def get_notifications(page_number=1, page_size=20):
+    offset  = (page_number - 1) * page_size
+    print(offset)
     Notification = frappe.qb.DocType("CRM Notification")
+
+    count_all = Count('1').as_("count")
+
     query = (
         frappe.qb.from_(Notification)
-        .select("*")
         .where(Notification.to_user == frappe.session.user)
-        .orderby("creation", order=Order.desc)
     )
-    notifications = query.run(as_dict=True)
+    notifications = (
+        query
+        .select("*")
+        .orderby("creation", order=Order.desc)
+        .limit(page_size)
+        .offset(offset)
+        ).run(as_dict=True)
+
+    total_count = (
+         query
+        .select(count_all)
+    ).run(as_dict=True) [0]['count']
+
+    unread_count = (
+         query
+        .select(count_all)
+        .where(Notification.read == 0)
+    ).run(as_dict=True) [0]['count']
 
     _notifications = []
     for notification in notifications:
@@ -36,8 +57,9 @@ def get_notifications():
                 "route_name": notification.reference_doctype[4:].title(),
             }
         )
+    page_rows_count = len(notifications)
 
-    return _notifications
+    return {"data": _notifications, "page_rows_count": page_rows_count, "total_count": total_count, "unread_count": unread_count }
 
 
 @frappe.whitelist()

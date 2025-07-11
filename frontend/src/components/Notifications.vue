@@ -11,9 +11,7 @@
     }"
   >
     <div class="flex h-screen flex-col text-ink-gray-9">
-      <div
-        class="z-20 flex items-center justify-between border-b bg-surface-white px-5 py-2.5"
-      >
+      <div class="z-20 flex items-center justify-between border-b bg-surface-white px-5 py-2.5">
         <div class="text-base font-medium">{{ __('Notifications') }}</div>
         <div class="flex gap-1">
 
@@ -56,7 +54,7 @@
           :key="n.name"
           :to="getRoute(n)"
           class="flex cursor-pointer items-start gap-2.5 px-4 py-2.5 hover:bg-surface-gray-2"
-          @click="markAsRead(n.name || n.notification_type_doc)"
+          @click="markAsRead(n.notification_type_doc)"
         >
           <div class="mt-1 flex items-center gap-2.5">
             <div
@@ -84,7 +82,7 @@
             </div>
           </div>
         </RouterLink>
-      </div>
+      </div>     
       <div
         v-else
         class="flex flex-1 flex-col items-center justify-center gap-2"
@@ -94,6 +92,14 @@
           {{ __('No new notifications') }}
         </div>
       </div>
+      <div v-if="has_more()" class="text-center">
+          <Button 
+            variant="ghost" 
+            @click="() => load_page()"
+            :label="__('Load More')"
+          >
+          </Button>
+        </div>
     </div>
   </div>
   <!-- In-app Popup -->
@@ -149,12 +155,13 @@ import {
   visible,
   notifications,
   notificationsStore,
+  notificationsResource
 } from '@/stores/notifications'
 import { globalStore } from '@/stores/global'
 import { timeAgo } from '@/utils'
 
 const { $socket } = globalStore()
-const { mark_as_read, toggle, mark_doc_as_read } = notificationsStore()
+const { mark_as_read, toggle, mark_doc_as_read, load_next_page, reset, has_more} = notificationsStore()
 const target = ref(null)
 onClickOutside(
   target,
@@ -265,7 +272,11 @@ function markAllAsRead() {
   mark_as_read.reload()
 }
 function refresh(){
-  notifications.reload()
+  reset()
+}
+function load_page(){
+  if(notificationsResource)
+  load_next_page()
 }
 
 onBeforeUnmount(() => {
@@ -275,7 +286,7 @@ onBeforeUnmount(() => {
 onMounted(() => {
   $socket.on('crm_notification', (notification) => {
     setTimeout(()=>{
-      notifications.reload()
+      notificationsResource.reload()
     }, 1000)
     
     showPushNotification(notification)
