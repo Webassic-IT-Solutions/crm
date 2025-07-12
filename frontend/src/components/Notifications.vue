@@ -311,7 +311,6 @@ onMounted(() => {
 })
 
 function getRoute(notification) {
-  console.log(notification?.route_name)
   if(!notification.reference_name){
     return {
       name: "Tasks"

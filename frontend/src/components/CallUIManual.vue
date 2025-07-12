@@ -177,8 +177,6 @@ function close(){
 
 }
 async function saveCallLog(){
-    console.log(props.reference_doc)
-    console.log(_note.value)
     let note = await call('frappe.client.insert', {
       doc: {
         doctype: 'FCRM Note',

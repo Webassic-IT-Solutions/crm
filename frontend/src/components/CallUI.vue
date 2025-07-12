@@ -447,9 +447,6 @@ onMounted(async () => {
   }
 })
 async function makeOutgoingCallDialog(number, doc) {
-  console.log("open manual call dialog>>>>>>" + number)
-  console.log("doctype:" + doc.doctype)
-  console.log(doc)
   log.value = `Initiated call!`
   //showCallPopup.value = true
   reference_doc.value = doc
