@@ -7,9 +7,28 @@ class CRMNotification(Document):
 	def after_insert(self):
 		# Send real-time notification to the target user only
 		print(F"Send notification {frappe.as_json(self)}")
+		notification_dto = {
+                "creation": self.creation,
+                "from_user": {
+                    "name": self.from_user,
+                    "full_name": frappe.get_value(
+                        "User", self.from_user, "full_name"
+                    ),
+                },
+                "type": self.type,
+                "to_user": self.to_user,
+                "read": self.read,
+                #"hash": get_hash(notification),
+                "notification_text": self.notification_text,
+                "notification_type_doctype": self.notification_type_doctype,
+                "notification_type_doc": self.notification_type_doc,
+                "reference_doctype": self.reference_doctype[4:].lower(),
+                "reference_name": self.reference_name,
+                "route_name": self.reference_doctype[4:].title(),
+            }
 		frappe.publish_realtime(
 			event="crm_notification",
-			message=self,
+			message=notification_dto,
 			user=self.to_user
 		)
 

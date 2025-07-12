@@ -102,22 +102,24 @@
       </div>
     </div>
   </div>
-  <!-- In-app Popup -->
+  
+<!-- In-app Popup -->
 <Transition name="fade">
   <div
     v-if="showPopup"
-    class="fixed bottom-5 right-5 z-50 max-w-sm rounded-lg bg-white p-4 shadow-lg border border-gray-200"
+    class="fixed bottom-5 right-5 z-50 max-w-sm rounded-lg bg-white p-4 shadow-lg border border-gray-200 cursor-pointer"
+    @click="navigateFromPopup"
   >
     <div class="flex items-start justify-between gap-3">
       <div class="flex items-start gap-3">
         <UserAvatar
           v-if="popupNotification"
-          :user="popupNotification.from_user || ''"
+          :user="popupNotification.from_user?.full_name|| popupNotification.from_user || ''"
           size="md"
         />
         <div>
           <div class="text-sm font-medium">
-            {{ popupNotification?.from_user || 'Someone' }}
+            {{ popupNotification.from_user?.full_name|| popupNotification?.from_user || 'Someone' }}
           </div>
           <div
             class="text-sm text-gray-700"
@@ -127,7 +129,7 @@
       </div>
       <!-- ✅ Manual close button -->
       <button
-        @click="closePopup"
+        @click.stop="closePopup"
         class="ml-2 text-gray-500 hover:text-gray-700"
       >
         ✕
@@ -159,6 +161,7 @@ import {
 } from '@/stores/notifications'
 import { globalStore } from '@/stores/global'
 import { timeAgo } from '@/utils'
+import { useRouter } from 'vue-router'
 
 const { $socket } = globalStore()
 const { mark_as_read, toggle, mark_doc_as_read, load_next_page, reset, has_more} = notificationsStore()
@@ -178,6 +181,8 @@ const popupNotification = ref(null)
 const notificationPermission = ref(Notification.permission)
 const notificationSound = ref(null)
 const popupTimeout = ref(null)
+
+const router = useRouter()
 
 function requestNotificationPermission() {
   if (!("Notification" in window)) {
@@ -226,7 +231,7 @@ function showPushNotification(notification) {
       if (permission === 'granted') {
         showPushNotification(notification)
       } else {
-        showInAppPopup(notification)
+        showInAppPopup( )
       }
     })
   } else {
@@ -255,6 +260,17 @@ function closePopup() {
   if (popupTimeout.value) {
     clearTimeout(popupTimeout.value)
     popupTimeout.value = null
+  }
+}
+
+function navigateFromPopup() {
+  if (popupNotification.value) {
+    const route = getRoute(popupNotification.value)
+    if (route) {
+      markAsRead(popupNotification.value.notification_type_doc)
+      router.push(route)
+    }
+    closePopup()
   }
 }
 
@@ -295,6 +311,7 @@ onMounted(() => {
 })
 
 function getRoute(notification) {
+  console.log(notification?.route_name)
   if(!notification.reference_name){
     return {
       name: "Tasks"
