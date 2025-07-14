@@ -19,7 +19,6 @@ export const notificationsResource = createResource({
   initialData: [],
   auto: true,
   onSuccess: () => {
-    console.log(notificationsResource)
     
   }
 })
@@ -57,11 +56,13 @@ export const notificationsStore = defineStore('crm-notifications', () => {
     }
   }
   function has_more() {
-    console.log("has_more")
     let offset  = (current_page.value) * 20;
     return offset <= notificationsResource.data.total_count;
   }
   function reset(){
+    if(current_page.value == 1){
+      notificationsResource.reload()
+    }
     current_page.value = 1
   }
   watch(current_page, ()=>{
