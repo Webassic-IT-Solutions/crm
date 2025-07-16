@@ -6,7 +6,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.desk.form.assign_to import add as assign, remove as unassign
 from crm.fcrm.doctype.crm_notification.crm_notification import notify_user
-
+from frappe.utils import now_datetime, add_to_date
 
 class CRMTask(Document):
 	def after_insert(self):
@@ -142,16 +142,16 @@ def notify_task_owner_onupdate(doc):
 
 #logic for reminder for evry 2 minutes it has to reminde
 
-from frappe.utils import now_datetime
 
 def send_overdue_task_reminders():
+	frappe.logger().info("Scheduled job send_overdue_task_reminders running")
 	overdue_tasks = frappe.db.sql(
 		"""
-		SELECT assigned_to, COUNT(*) as task_count
+		SELECT assigned_to, COUNT(1) as task_count
 		FROM `tabCRM Task`
 		WHERE
-			due_date < NOW()
-			AND status != 'Completed'
+			( due_date < NOW() or due_date is null )
+			AND status != 'Done' AND status != 'Cancelled'
 			AND assigned_to IS NOT NULL
 		GROUP BY assigned_to
 		""",
@@ -175,7 +175,6 @@ def send_overdue_task_reminders():
 
 			notify_user(
 				{
-      
 					"owner": owner,
 					"assigned_to": user,
 					"notification_type": "Task",
@@ -187,4 +186,44 @@ def send_overdue_task_reminders():
 					"redirect_to_docname": None,
 				}
 			)
+	frappe.db.commit()
+
+
+def send_upcoming_task_reminders():
+	current_time = now_datetime()
+	end_time = add_to_date(current_time, minutes=15)
+
+	tasks = frappe.get_all(
+        "CRM Task",
+        filters={
+            "due_date": ["between", [current_time, end_time]],
+            "status": ["!=", "Done"],
+            "status": ["!=", "Cancelled"]
+        },
+        fields=["name", "due_date", "assigned_to", "title"]
+    )
+
+	for task in tasks:
+		message = f"Reminder: Tasks {task.title} is due at {frappe.utils.format_datetime(task.due_date, 'HH:mm:ss')}"
+		notification_text = f"""
+			<div class="mb-2 leading-5 text-ink-gray-5">
+				<span class="font-medium text-ink-gray-9">Reminder</span>
+				<span>: You have Tasks <strong>{task.title}</strong> is due at <strong>{frappe.utils.format_datetime(task.due_date, 'HH:mm:ss')}</strong>. Please review them.</span>
+			</div>
+		"""
+
+		notify_user(
+			{
+	
+				"owner": "Administrator",
+				"assigned_to": task.assigned_to,
+				"notification_type": "Task",
+				"message": message,
+				"notification_text": notification_text,
+				"reference_doctype": "CRM Task",
+				"reference_docname": None,
+				"redirect_to_doctype": "CRM Task",
+				"redirect_to_docname": None,
+			}
+		)
 	frappe.db.commit()

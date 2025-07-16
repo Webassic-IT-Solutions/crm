@@ -641,8 +641,24 @@ def getCounts(d, doctype):
 def get_permission_query_conditions(user):
     return f"""(`owner` = "{user}" or assigned_to = "{user}")"""
 
+def get_lead_permission_query_conditions(user):
+    return f"""(`owner` = "{user}" or lead_owner = "{user}")"""
+
+def get_deal_permission_query_conditions(user):
+    return f"""(`owner` = "{user}" or deal_owner = "{user}")"""
 
 def has_permission(doc, ptype, user):
 	if doc.owner == user or doc.assigned_to == user:
 		return True
 	return False
+
+def has_lead_permission(doc, ptype, user):
+	if doc.owner == user or doc.lead_owner == user:
+		return True
+	return False
+
+def has_deal_permission(doc, ptype, user):
+	if doc.owner == user or doc.deal_owner == user:
+		return True
+	return False
+

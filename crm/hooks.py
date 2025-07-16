@@ -119,11 +119,16 @@ before_uninstall = "crm.uninstall.before_uninstall"
 
 
 permission_query_conditions = {
- "CRM Task": "crm.api.doc.get_permission_query_conditions" # "crm.hooks.get_permission_query_conditions",
+ "CRM Task": "crm.api.doc.get_permission_query_conditions", # "crm.hooks.get_permission_query_conditions",
+# "CRM Lead": "crm.api.doc.get_lead_permission_query_conditions", 
+ #"CRM Deal": "crm.api.doc.get_deal_permission_query_conditions",
+
 }
 #
 has_permission = {
  "CRM Task": "crm.api.doc.has_permission",
+# "CRM Lead": "crm.api.doc.has_lead_permission",
+ #"CRM Deal": "crm.api.doc.has_deal_permission",
 }
 
 # DocType Class
@@ -168,14 +173,15 @@ doc_events = {
 # Scheduled Tasks
 # ---------------
 scheduler_events = {
-	# "cron": {
-	# 	"*/2 * * * *": [
-	# 		"crm.fcrm.doctype.crm_task.crm_task.send_overdue_task_reminders"
-	# 	]
-	# }
-  "daily": [
-		"crm.fcrm.doctype.crm_task.crm_task.send_overdue_task_reminders"	
-	]
+	"cron": {
+		"*/15 9-17 * * *": [
+			"crm.fcrm.doctype.crm_task.crm_task.send_overdue_task_reminders",
+			"crm.fcrm.doctype.crm_task.crm_task.send_upcoming_task_reminders",   
+		]
+	}
+#   "daily": [
+# 		"crm.fcrm.doctype.crm_task.crm_task.send_overdue_task_reminders"	
+# 	]
 }
 
 # scheduler_events = {
